@@ -83,7 +83,7 @@ public class GeradorMegaSena extends JFrame {
         JLabel lblNumeros = new JLabel("Números por Jogo:");
         lblNumeros.setForeground(TEXT_COLOR);
         lblNumeros.setFont(FONTE_PRINCIPAL);
-        spinnerNumeros = criarSpinner(6, 15, 6);
+        spinnerNumeros = criarSpinner(6, 30, 6);
 
         painelConfig.add(lblJogos);
         painelConfig.add(spinnerJogos);
