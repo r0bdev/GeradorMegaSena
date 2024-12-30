@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.awt.Font;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -184,7 +185,7 @@ public class GeradorMegaSena extends JFrame {
         add(painelSuperior, BorderLayout.NORTH);
 
         // Configuração do evento de mudança do tipo de jogo
-        comboJogos.addActionListener(e -> {
+        comboJogos.addActionListener((var e) -> {
             TipoJogo tipoSelecionado = (TipoJogo) comboJogos.getSelectedItem();
             if (tipoSelecionado != null) {
                 boolean isPersonalizado = tipoSelecionado == TipoJogo.PERSONALIZADO;
@@ -196,6 +197,8 @@ public class GeradorMegaSena extends JFrame {
                 model.setMaximum(tipoSelecionado.numerosMaximos);
                 model.setValue(tipoSelecionado.numerosMinimos);
 
+                SpinnerNumberModel maxModel = (SpinnerNumberModel) spinnerMaximo.getModel();
+                maxModel.setValue(tipoSelecionado.numeroMaximo);
                 if (isPersonalizado) {
                     // Atualiza o número máximo quando alterado
                     spinnerMaximo.addChangeListener(evt -> {
