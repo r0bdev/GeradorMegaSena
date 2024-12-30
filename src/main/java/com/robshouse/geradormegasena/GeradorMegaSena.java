@@ -21,24 +21,63 @@ public class GeradorMegaSena extends JFrame {
 
     private static final Color DARK_BG = new Color(17, 23, 26);
     private static final Color DARK_SECONDARY = new Color(25, 32, 36);
-    private static final Color ACCENT_COLOR = new Color(29, 185, 84);  // Spotify green
+    private static final Color ACCENT_COLOR = new Color(29, 185, 84);
     private static final Color ACCENT_HOVER = new Color(30, 215, 96);
     private static final Color TEXT_COLOR = new Color(230, 230, 230);
     private static final Color CLOSE_BTN_COLOR = new Color(232, 17, 35);
     private static final Color CLOSE_BTN_HOVER = new Color(241, 112, 122);
+
+    // Definição dos tipos de jogos
+    private enum TipoJogo {
+        MEGA_SENA("Mega-Sena", 60, 6, 20),
+        QUINA("Quina", 80, 5, 15),
+        LOTOFACIL("Lotofácil", 25, 15, 20),
+        LOTOMANIA("Lotomania", 100, 50, 50),
+        DUPLA_SENA("Dupla Sena", 50, 6, 15),
+        DIA_DE_SORTE("Dia de Sorte", 31, 7, 15),
+        SUPER_SETE("Super Sete", 10, 7, 7),
+        TIMEMANIA("Timemania", 80, 10, 10),
+        PERSONALIZADO("Personalizado", 60, 6, 20); // Valores padrão que podem ser alterados
+
+        private final String nome;
+        private int numeroMaximo;
+        private final int numerosMinimos;
+        private final int numerosMaximos;
+
+        TipoJogo(String nome, int numeroMaximo, int numerosMinimos, int numerosMaximos) {
+            this.nome = nome;
+            this.numeroMaximo = numeroMaximo;
+            this.numerosMinimos = numerosMinimos;
+            this.numerosMaximos = numerosMaximos;
+        }
+
+        public void setNumeroMaximo(int novoMaximo) {
+            if (this == PERSONALIZADO) {
+                this.numeroMaximo = novoMaximo;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return nome;
+        }
+    }
 
     private JTextArea areaJogos;
     private JButton btnGerar;
     private JButton btnCopiar;
     private JSpinner spinnerJogos;
     private JSpinner spinnerNumeros;
+    private JSpinner spinnerMaximo;
+    private JComboBox<TipoJogo> comboJogos;
+    private JPanel painelNumeroMaximo;
     private static final Font FONTE_PRINCIPAL = new Font("Inter", Font.PLAIN, 14);
     private static final Font FONTE_BOTOES = new Font("Inter", Font.BOLD, 14);
     private Clip clipSucesso;
     private Clip clipBotao;
 
     public GeradorMegaSena() {
-        super("Gerador Mega-Sena");
+        super("Gerador de Loteria");
         configurarJanela();
         criarComponentes();
         pack();
@@ -47,7 +86,7 @@ public class GeradorMegaSena extends JFrame {
 
     private void configurarJanela() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(500, 400));
+        setMinimumSize(new Dimension(700, 400));
         setUndecorated(true);
         setAlwaysOnTop(true);
         requestFocus();
@@ -72,6 +111,51 @@ public class GeradorMegaSena extends JFrame {
         painelSuperior.setBackground(DARK_BG);
         painelSuperior.setBorder(new EmptyBorder(15, 15, 0, 15));
 
+        // Painel para seleção do tipo de jogo
+        JPanel painelTipoJogo = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
+        painelTipoJogo.setBackground(DARK_BG);
+
+        JLabel lblTipoJogo = new JLabel("Tipo de Jogo:");
+        lblTipoJogo.setForeground(TEXT_COLOR);
+        lblTipoJogo.setFont(FONTE_PRINCIPAL);
+
+        comboJogos = new JComboBox<>(TipoJogo.values());
+        comboJogos.setFont(FONTE_PRINCIPAL);
+        comboJogos.setBackground(DARK_SECONDARY);
+//        comboJogos.setForeground(TEXT_COLOR);
+        comboJogos.setPreferredSize(new Dimension(150, 30));
+
+// Ajusta a cor do texto na dropdown
+        comboJogos.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value,
+                    int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                setBackground(isSelected ? ACCENT_COLOR : DARK_SECONDARY);
+                setForeground(TEXT_COLOR);
+                return this;
+            }
+        });
+        ((JComponent) comboJogos.getRenderer()).setOpaque(true);
+
+        // Painel para número máximo personalizado
+        painelNumeroMaximo = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
+        painelNumeroMaximo.setBackground(DARK_BG);
+
+        JLabel lblMaximo = new JLabel("Número Máximo:");
+        lblMaximo.setForeground(TEXT_COLOR);
+        lblMaximo.setFont(FONTE_PRINCIPAL);
+
+        spinnerMaximo = criarSpinner(10, 1000, 60); // Permite valores bem flexíveis
+        painelNumeroMaximo.add(lblMaximo);
+        painelNumeroMaximo.add(spinnerMaximo);
+        painelNumeroMaximo.setVisible(true); // Inicialmente oculto
+
+        painelTipoJogo.add(lblTipoJogo);
+        painelTipoJogo.add(comboJogos);
+        painelTipoJogo.add(painelNumeroMaximo);
+
+        // Painel para configurações do jogo
         JPanel painelConfig = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
         painelConfig.setBackground(DARK_BG);
 
@@ -83,15 +167,46 @@ public class GeradorMegaSena extends JFrame {
         JLabel lblNumeros = new JLabel("Números por Jogo:");
         lblNumeros.setForeground(TEXT_COLOR);
         lblNumeros.setFont(FONTE_PRINCIPAL);
-        spinnerNumeros = criarSpinner(6, 30, 6);
+        spinnerNumeros = criarSpinner(6, 20, 6);
 
         painelConfig.add(lblJogos);
         painelConfig.add(spinnerJogos);
         painelConfig.add(lblNumeros);
         painelConfig.add(spinnerNumeros);
 
-        painelSuperior.add(painelConfig, BorderLayout.CENTER);
+        // Adiciona os painéis ao painel superior
+        JPanel painelConfigCompleto = new JPanel(new GridLayout(2, 1, 0, 5));
+        painelConfigCompleto.setBackground(DARK_BG);
+        painelConfigCompleto.add(painelTipoJogo);
+        painelConfigCompleto.add(painelConfig);
+
+        painelSuperior.add(painelConfigCompleto, BorderLayout.CENTER);
         add(painelSuperior, BorderLayout.NORTH);
+
+        // Configuração do evento de mudança do tipo de jogo
+        comboJogos.addActionListener(e -> {
+            TipoJogo tipoSelecionado = (TipoJogo) comboJogos.getSelectedItem();
+            if (tipoSelecionado != null) {
+                boolean isPersonalizado = tipoSelecionado == TipoJogo.PERSONALIZADO;
+//                painelNumeroMaximo.setVisible(isPersonalizado);
+
+                // Atualiza os limites do spinner de números
+                SpinnerNumberModel model = (SpinnerNumberModel) spinnerNumeros.getModel();
+                model.setMinimum(tipoSelecionado.numerosMinimos);
+                model.setMaximum(tipoSelecionado.numerosMaximos);
+                model.setValue(tipoSelecionado.numerosMinimos);
+
+                if (isPersonalizado) {
+                    // Atualiza o número máximo quando alterado
+                    spinnerMaximo.addChangeListener(evt -> {
+                        int novoMaximo = (int) spinnerMaximo.getValue();
+                        tipoSelecionado.setNumeroMaximo(novoMaximo);
+                    });
+                }
+
+                pack(); // Reajusta o tamanho da janela
+            }
+        });
 
         areaJogos = new JTextArea(12, 35);
         areaJogos.setFont(new Font("JetBrains Mono", Font.PLAIN, 14));
@@ -118,7 +233,6 @@ public class GeradorMegaSena extends JFrame {
         btnGerar = criarBotaoPrincipal("Gerar Jogos", ACCENT_COLOR);
         btnCopiar = criarBotaoPrincipal("Copiar Todos", ACCENT_COLOR);
 
-        // Criar o botão fechar
         JButton closeButton = criarBotaoPrincipal("Fechar", CLOSE_BTN_COLOR);
         closeButton.setPreferredSize(new Dimension(150, 40));
         closeButton.addActionListener(e -> System.exit(0));
@@ -151,11 +265,9 @@ public class GeradorMegaSena extends JFrame {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                // Desenha o fundo arredondado com antialiasing
                 g2.setColor(getBackground());
                 g2.fill(new RoundRectangle2D.Double(0, 0, getWidth() - 1, getHeight() - 1, 20, 20));
 
-                // Configura a fonte e desenha o texto
                 g2.setColor(getForeground());
                 g2.setFont(getFont());
                 FontMetrics fm = g2.getFontMetrics();
@@ -245,17 +357,26 @@ public class GeradorMegaSena extends JFrame {
         Random random = new Random();
         int quantidadeJogos = (int) spinnerJogos.getValue();
         int numerosPerJogo = (int) spinnerNumeros.getValue();
+        TipoJogo tipoSelecionado = (TipoJogo) comboJogos.getSelectedItem();
 
-        for (int i = 1; i <= quantidadeJogos; i++) {
-            Set<Integer> numeros = new HashSet<>();
-            while (numeros.size() < numerosPerJogo) {
-                numeros.add(random.nextInt(60) + 1);
+        if (tipoSelecionado != null) {
+            // Adiciona cabeçalho com informações do jogo
+            jogos.append(String.format("=== %s ===\n", tipoSelecionado.nome));
+            jogos.append(String.format("Números por jogo: %d (entre 1 e %d)\n\n",
+                    numerosPerJogo, tipoSelecionado.numeroMaximo));
+
+            // Gera os jogos
+            for (int i = 1; i <= quantidadeJogos; i++) {
+                Set<Integer> numeros = new HashSet<>();
+                while (numeros.size() < numerosPerJogo) {
+                    numeros.add(random.nextInt(tipoSelecionado.numeroMaximo) + 1);
+                }
+
+                jogos.append(String.format("Jogo %02d: ", i));
+                numeros.stream().sorted()
+                        .forEach(numero -> jogos.append(String.format("%02d ", numero)));
+                jogos.append("\n");
             }
-
-            jogos.append(String.format("Jogo %02d: ", i));
-            numeros.stream().sorted()
-                    .forEach(numero -> jogos.append(String.format("%02d ", numero)));
-            jogos.append("\n");
         }
 
         areaJogos.setText(jogos.toString());
