@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <!-- Stem -->
+    <path d="M32 45 L32 60" stroke="#2D5A27" stroke-width="4" fill="none"/>
+    
+    <!-- Leaves -->
+    <path d="M32 32 Q25 25 32 18 Q39 25 32 32" fill="#4CAF50"/>
+    <path d="M32 32 Q39 25 46 32 Q39 39 32 32" fill="#4CAF50"/>
+    <path d="M32 32 Q25 39 18 32 Q25 25 32 32" fill="#4CAF50"/>
+    <path d="M32 32 Q39 39 32 46 Q25 39 32 32" fill="#4CAF50"/>
+    
+    <!-- Leaf highlights -->
+    <path d="M32 32 Q28 28 32 24 Q36 28 32 32" fill="#81C784" opacity="0.5"/>
+    <path d="M32 32 Q36 28 40 32 Q36 36 32 32" fill="#81C784" opacity="0.5"/>
+    <path d="M32 32 Q28 36 24 32 Q28 28 32 32" fill="#81C784" opacity="0.5"/>
+    <path d="M32 32 Q36 36 32 40 Q28 36 32 32" fill="#81C784" opacity="0.5"/>
+</svg>
